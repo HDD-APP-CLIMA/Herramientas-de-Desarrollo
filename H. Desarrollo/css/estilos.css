@@ -1,0 +1,229 @@
+/* ========== VARIABLES ========== */
+:root {
+    --primary: #6C63FF;
+    --primary-dark: #5A52D5;
+    --secondary: #2D3748;
+    --success: #48BB78;
+    --danger: #F56565;
+    --background: #F7FAFC;
+    --card-bg: #FFFFFF;
+    --text: #2D3748;
+    --text-light: #718096;
+    --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    --radius: 16px;
+    --transition: all 0.3s ease;
+}
+
+/* ========== RESET ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* ========== CONTENEDOR PRINCIPAL ========== */
+.container {
+    background: var(--card-bg);
+    width: 100%;
+    max-width: 700px;
+    padding: 40px 45px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.container:hover {
+    box-shadow: 0 20px 50px rgba(108, 99, 255, 0.15);
+}
+
+/* ========== TÍTULO ========== */
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--secondary);
+    text-align: center;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+h1 span {
+    color: var(--primary);
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #EDF2F7;
+    padding-bottom: 20px;
+}
+
+/* ========== INPUT Y BOTÓN ========== */
+.input-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 14px 18px;
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: var(--transition);
+    outline: none;
+    background: #F7FAFC;
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
+}
+
+.btn-primary {
+    padding: 14px 28px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(108, 99, 255, 0.3);
+}
+
+.btn-primary:active {
+    transform: scale(0.97);
+}
+
+/* ========== LISTA DE TAREAS ========== */
+.lista-container {
+    margin-top: 10px;
+}
+
+#listaTareas {
+    list-style: none;
+    padding: 0;
+}
+
+#listaTareas li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F7FAFC;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    transition: var(--transition);
+    border-left: 4px solid var(--primary);
+}
+
+#listaTareas li:hover {
+    background: #EDF2F7;
+    transform: translateX(4px);
+}
+
+#listaTareas li span {
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    flex: 1;
+}
+
+#listaTareas li span:hover {
+    color: var(--primary);
+}
+
+/* Tarea completada */
+#listaTareas li.completada {
+    border-left-color: var(--success);
+    opacity: 0.7;
+}
+
+#listaTareas li.completada span {
+    text-decoration: line-through;
+    color: var(--text-light);
+}
+
+/* ========== BOTÓN ELIMINAR ========== */
+.btn-delete {
+    background: transparent;
+    border: none;
+    color: var(--danger);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.btn-delete:hover {
+    background: #FED7D7;
+    transform: scale(1.1);
+}
+
+/* ========== CONTADOR ========== */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 2px solid #EDF2F7;
+}
+
+#contador {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+.badge {
+    background: var(--primary);
+    color: white;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 600px) {
+    .container {
+        padding: 25px 20px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+}

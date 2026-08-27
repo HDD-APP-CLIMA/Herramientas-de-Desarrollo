@@ -1,11 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gastos Compartidos</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Gestión de Tareas</title>
+    <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
-  <div id="root"></div>
+    <div class="container">
+        <!-- Título -->
+        <h1>📋 <span>Gestión</span> de Tareas</h1>
+        <p class="subtitle">Organiza tus tareas de forma colaborativa</p>
+
+        <!-- Input + Botón -->
+        <div class="input-group">
+            <input type="text" id="tareaInput" placeholder="Escribe una nueva tarea...">
+            <button class="btn-primary" onclick="agregarTarea()">+ Agregar</button>
+        </div>
+
+        <!-- Lista de tareas -->
+        <div class="lista-container">
+            <ul id="listaTareas"></ul>
+        </div>
+
+        <!-- Footer con contador -->
+        <div class="footer">
+            <span>📌 Total de tareas</span>
+            <span>
+                <span class="badge" id="contador">0</span>
+            </span>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
 </body>
-</html> 
+</html>
