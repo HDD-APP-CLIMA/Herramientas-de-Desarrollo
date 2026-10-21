@@ -1,51 +1,72 @@
+
 import type { Ciudad } from '../models/ciudad.model';
 
+export type NivelAlerta = 'alto' | 'medio' | 'bajo';
+
 export interface Alerta {
-  nivel: 'alto' | 'medio' | 'bajo';
+  nivel: NivelAlerta;
   tipo: string;
   mensaje: string;
 }
 
 export interface AlertaCiudad {
-  ciudad:  string;
+  ciudad: string;
   alertas: Alerta[];
 }
 
-export const evaluarAlerta = (ciudad: Ciudad): Alerta[] => {
-  const alertas: Alerta[] = [];
+interface ReglaAlerta {
+  condicion: (ciudad: Ciudad) => boolean;
+  nivel: NivelAlerta;
+  tipo: string;
+  mensaje: (ciudad: Ciudad) => string;
+}
 
-  if (ciudad.precipitacion >= 10)
-    alertas.push({
-      nivel: 'alto',
-      tipo: 'Lluvia intensa',
-      mensaje: `Precipitaciones de ${ciudad.precipitacion} mm. Evite zonas de riesgo.`,
-    });
+const REGLAS_ALERTA: ReglaAlerta[] = [
+  {
+    condicion: ciudad => ciudad.precipitacion >= 10,
+    nivel: 'alto',
+    tipo: 'Lluvia intensa',
+    mensaje: ciudad =>
+      `Se registran ${ciudad.precipitacion} mm de precipitación. Evita zonas inundables y quebradas.`,
+  },
+  {
+    condicion: ciudad => ciudad.temperatura >= 30,
+    nivel: 'medio',
+    tipo: 'Temperatura elevada',
+    mensaje: ciudad =>
+      `La temperatura es de ${ciudad.temperatura} °C. Mantente hidratado y evita la exposición prolongada al sol.`,
+  },
+  {
+    condicion: ciudad => ciudad.uv >= 8,
+    nivel: 'medio',
+    tipo: 'Radiación UV elevada',
+    mensaje: ciudad =>
+      `El índice UV es ${ciudad.uv}. Usa protector solar, sombrero y busca sombra.`,
+  },
+  {
+    condicion: ciudad => ciudad.viento >= 40,
+    nivel: 'bajo',
+    tipo: 'Vientos fuertes',
+    mensaje: ciudad =>
+      `Se registran vientos de ${ciudad.viento} km/h. Ten precaución en exteriores.`,
+  },
+];
 
-  if (ciudad.temperatura >= 30)
-    alertas.push({
-      nivel: 'medio',
-      tipo: 'Calor extremo',
-      mensaje: `Temperatura de ${ciudad.temperatura}°C. Manténgase hidratado.`,
-    });
+export const evaluarAlerta = (ciudad: Ciudad): Alerta[] =>
+  REGLAS_ALERTA
+    .filter(regla => regla.condicion(ciudad))
+    .map(regla => ({
+      nivel: regla.nivel,
+      tipo: regla.tipo,
+      mensaje: regla.mensaje(ciudad),
+    }));
 
-  if (ciudad.uv >= 8)
-    alertas.push({
-      nivel: 'medio',
-      tipo: 'UV elevado',
-      mensaje: `Índice UV de ${ciudad.uv}. Se recomienda protector solar.`,
-    });
-
-  if (ciudad.viento >= 40)
-    alertas.push({
-      nivel: 'bajo',
-      tipo: 'Viento fuerte',
-      mensaje: `Vientos de ${ciudad.viento} km/h. Precaución en exteriores.`,
-    });
-
-  return alertas;
-};
-
-export const obtenerAlertas = (ciudades: Ciudad[]): AlertaCiudad[] =>
+export const obtenerAlertas = (
+  ciudades: Ciudad[],
+): AlertaCiudad[] =>
   ciudades
-    .map(c => ({ ciudad: c.nombre, alertas: evaluarAlerta(c) }))
-    .filter(item => item.alertas.length > 0);
+    .map(ciudad => ({
+      ciudad: ciudad.nombre,
+      alertas: evaluarAlerta(ciudad),
+    }))
+    .filter(resultado => resultado.alertas.length > 0);
