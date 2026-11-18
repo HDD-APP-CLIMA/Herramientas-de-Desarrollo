@@ -43,6 +43,7 @@ let ciudades = [
     id: 1,
     nombre: "Lima",
     temperatura: 32,
+    temperaturaMaxima: 32,
     sensacion: 20,
     descripcion: "Nublado",
     humedad: 85,
@@ -63,6 +64,7 @@ let ciudades = [
     id: 2,
     nombre: "Cusco",
     temperatura: 18,
+    temperaturaMaxima: 18,
     sensacion: 14,
     descripcion: "Soleado",
     humedad: 60,
@@ -130,7 +132,7 @@ app.get('/api/ciudades/:id', (req, res) => {
 
 // POST crear ciudad
 app.post('/api/ciudades', (req, res) => {
-  const { nombre, temperatura, sensacion, descripcion,
+  const { nombre, temperatura, temperaturaMaxima, sensacion, descripcion,
           humedad, viento, precipitacion, presion,
           visibilidad, uv, pronostico } = req.body;
 
@@ -147,6 +149,10 @@ app.post('/api/ciudades', (req, res) => {
   // Temperatura general dentro de rango
   if (temperatura !== undefined && (temperatura > TEMP_MAX || temperatura < TEMP_MIN)) {
     return res.status(400).json({ mensaje: `La temperatura debe estar entre ${TEMP_MIN}° y ${TEMP_MAX}°` });
+  }
+
+  if (temperaturaMaxima !== undefined && (temperaturaMaxima > TEMP_MAX || temperaturaMaxima < TEMP_MIN)) {
+    return res.status(400).json({ mensaje: `La temperatura máxima debe estar entre ${TEMP_MIN}° y ${TEMP_MAX}°` });
   }
 
   if (sensacion !== undefined && (sensacion > TEMP_MAX || sensacion < TEMP_MIN)) {
@@ -190,6 +196,7 @@ app.post('/api/ciudades', (req, res) => {
     id: nextId++,
     nombre: nombre.trim(),
     temperatura: temperatura ?? 0,
+    temperaturaMaxima: temperaturaMaxima ?? temperatura ?? 0,
     sensacion: sensacion ?? 0,
     descripcion: descripcion,
     humedad: humedad ?? 0,
@@ -214,7 +221,7 @@ app.put('/api/ciudades/:id', (req, res) => {
     return res.status(404).json({ mensaje: 'Ciudad no encontrada' });
   }
 
-const { nombre, descripcion, pronostico, temperatura, sensacion } = req.body;
+const { nombre, descripcion, pronostico, temperatura, temperaturaMaxima, sensacion } = req.body;
 
   // Validar nombre duplicado excluyendo la ciudad actual
   if (nombre) {
@@ -234,6 +241,10 @@ const { nombre, descripcion, pronostico, temperatura, sensacion } = req.body;
   // Temperatura general dentro de rango
   if (temperatura !== undefined && (temperatura > TEMP_MAX || temperatura < TEMP_MIN)) {
     return res.status(400).json({ mensaje: `La temperatura debe estar entre ${TEMP_MIN}° y ${TEMP_MAX}°` });
+  }
+
+  if (temperaturaMaxima !== undefined && (temperaturaMaxima > TEMP_MAX || temperaturaMaxima < TEMP_MIN)) {
+    return res.status(400).json({ mensaje: `La temperatura máxima debe estar entre ${TEMP_MIN}° y ${TEMP_MAX}°` });
   }
 
   if (sensacion !== undefined && (sensacion > TEMP_MAX || sensacion < TEMP_MIN)) {

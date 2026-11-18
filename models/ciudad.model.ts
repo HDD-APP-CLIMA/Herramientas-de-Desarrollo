@@ -9,6 +9,7 @@ export interface Pronostico {
     id?: number;
     nombre: string;
     temperatura: number;
+    temperaturaMaxima: number;
     sensacion: number;
     descripcion: string;
     humedad: number;

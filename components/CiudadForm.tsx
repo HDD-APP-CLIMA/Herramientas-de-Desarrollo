@@ -64,11 +64,12 @@ export default function CiudadForm() {
     reset,
     watch,
     control,
-    formState: { errors, isSubmitting, isValid }
+    formState: { errors, isSubmitting }
   } = useForm<FormValues>({
     defaultValues: {
       nombre:        '',
       temperatura:   0,
+      temperaturaMaxima: 0,
       sensacion:     0,
       descripcion:   '',
       humedad:       0,
@@ -164,7 +165,7 @@ export default function CiudadForm() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit(onSubmit)}>
+              <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
                 {/* Nombre */}
                 <div className="mb-3">
@@ -180,9 +181,9 @@ export default function CiudadForm() {
                       ${errors.nombre ? 'is-invalid' : nombreLen > 0 ? 'is-valid' : ''}`}
                     placeholder="Ej: Lima, Cusco, Arequipa..."
                     {...register('nombre', {
-                      required:  'El nombre es obligatorio.',
+                      required: 'Ingresa el nombre de la ciudad antes de enviar.',
                       validate: {
-                        noVacio: val => Boolean(val.trim()) || 'El nombre es obligatorio.',
+                        noVacio: val => Boolean(val.trim()) || 'Ingresa el nombre de la ciudad antes de enviar.',
                         unico: val => {
                           const existe = ciudades.find(
                             c => c.nombre.toLowerCase() === val.trim().toLowerCase() && c.id !== ciudadId
@@ -195,7 +196,7 @@ export default function CiudadForm() {
                     })}
                   />
                   {errors.nombre && (
-                    <div className="invalid-feedback d-block">{errors.nombre.message}</div>
+                    <div className="text-danger small mt-1" role="alert">{errors.nombre.message}</div>
                   )}
                   <div className="d-flex justify-content-end mt-1">
                     <small className={nombreLen > 90 ? 'text-danger' : 'text-muted'}>
@@ -221,9 +222,9 @@ export default function CiudadForm() {
                   )}
                 </div>
 
-                {/* Temperatura y Sensacion */}
+                {/* Temperatura actual, máxima y sensación */}
                 <div className="row g-3 mb-3">
-                  <div className="col-6">
+                  <div className="col-6 col-md-4">
                     <label className="form-label fw-semibold">
                       <i className="bi bi-thermometer-half me-1"></i>Temperatura (°C)
                     </label>
@@ -240,7 +241,24 @@ export default function CiudadForm() {
                       <div className="invalid-feedback d-block">{errors.temperatura.message}</div>
                     )}
                   </div>
-                  <div className="col-6">
+                  <div className="col-6 col-md-4">
+                    <label className="form-label fw-semibold">
+                      <i className="bi bi-thermometer-high me-1"></i>Temperatura máxima (°C)
+                    </label>
+                    <input type="number"
+                      className={`form-control ${errors.temperaturaMaxima ? 'is-invalid' : ''}`}
+                      {...register('temperaturaMaxima', {
+                        required: 'Obligatorio.',
+                        valueAsNumber: true,
+                        min: { value: TEMP_MIN, message: `Mínimo ${TEMP_MIN}°.` },
+                        max: { value: TEMP_MAX, message: `Máximo ${TEMP_MAX}°.` },
+                      })}
+                    />
+                    {errors.temperaturaMaxima && (
+                      <div className="invalid-feedback d-block">{errors.temperaturaMaxima.message}</div>
+                    )}
+                  </div>
+                  <div className="col-6 col-md-4">
                     <label className="form-label fw-semibold">
                       <i className="bi bi-thermometer me-1"></i>Sensación (°C)
                     </label>
@@ -462,7 +480,7 @@ export default function CiudadForm() {
                 <div className="d-flex gap-2 pt-2">
                   <button type="submit"
                     className="btn btn-primary flex-grow-1 py-2"
-                    disabled={!isValid || isSubmitting || cargando || envioExitoso}>
+                    disabled={isSubmitting || cargando || envioExitoso}>
                     {isSubmitting ? (
                       <><span className="spinner-border spinner-border-sm me-2"></span>Guardando...</>
                     ) : envioExitoso ? (
