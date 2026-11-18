@@ -8,6 +8,8 @@ type FormValues = Omit<Ciudad, 'id'>;
 
 const TEMP_MIN = -30;
 const TEMP_MAX = 50;
+const NOMBRE_MIN_CARACTERES = 2;
+const NOMBRE_MAX_CARACTERES = 100;
 
 const obtenerProximosDias = (): string[] => {
   const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -170,6 +172,10 @@ export default function CiudadForm() {
                     <i className="bi bi-geo-alt me-1"></i>Nombre de la ciudad
                   </label>
                   <input
+                    type="text"
+                    required
+                    minLength={NOMBRE_MIN_CARACTERES}
+                    maxLength={NOMBRE_MAX_CARACTERES}
                     className={`form-control form-control-lg
                       ${errors.nombre ? 'is-invalid' : nombreLen > 0 ? 'is-valid' : ''}`}
                     placeholder="Ej: Lima, Cusco, Arequipa..."
@@ -184,8 +190,8 @@ export default function CiudadForm() {
                           return !existe || `Ya existe una ciudad llamada "${val.trim()}"`;
                         },
                       },
-                      minLength: { value: 2,   message: 'Mínimo 2 caracteres.'   },
-                      maxLength: { value: 100, message: 'Máximo 100 caracteres.' },
+                      minLength: { value: NOMBRE_MIN_CARACTERES, message: `Mínimo ${NOMBRE_MIN_CARACTERES} caracteres.` },
+                      maxLength: { value: NOMBRE_MAX_CARACTERES, message: `Máximo ${NOMBRE_MAX_CARACTERES} caracteres.` },
                     })}
                   />
                   {errors.nombre && (
