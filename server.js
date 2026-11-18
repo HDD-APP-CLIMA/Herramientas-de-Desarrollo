@@ -1,14 +1,32 @@
 // NOTA: LEAN LOS COMENTARIOS MRDS
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
-const PORT = 3000;
+const server = http.createServer(app);
+const PORT = process.env.PORT || 3000;
+
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  },
+});
+
+io.on('connection', (socket) => {
+  console.log(`Cliente conectado: ${socket.id}`);
+  socket.on('disconnect', () => {
+    console.log(`Cliente desconectado: ${socket.id}`);
+  });
+});
 
 // CORS para ambas apps
 app.use((req, res, next) => {
-  const allowed = ['http://localhost:5173', 'http://localhost:5174'];
-  const origin  = req.headers.origin;
-  if (allowed.includes(origin)) {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -199,6 +217,8 @@ app.post('/api/ciudades', (req, res) => {
   };
 
   ciudades.push(nueva);
+  io.emit('ciudades:created', nueva);
+  io.emit('alertas:updated', { motivo: 'ciudad_creada', ciudad: nueva });
   res.status(201).json(nueva);
 });
 
@@ -211,7 +231,7 @@ app.put('/api/ciudades/:id', (req, res) => {
     return res.status(404).json({ mensaje: 'Ciudad no encontrada' });
   }
 
-const { nombre, descripcion, pronostico, temperatura, sensacion } = req.body;
+  const { nombre, descripcion, pronostico, temperatura, sensacion } = req.body;
 
   // Validar nombre duplicado excluyendo la ciudad actual
   if (nombre) {
@@ -236,7 +256,7 @@ const { nombre, descripcion, pronostico, temperatura, sensacion } = req.body;
   if (sensacion !== undefined && (sensacion > TEMP_MAX || sensacion < TEMP_MIN)) {
     return res.status(400).json({ mensaje: `La sensación térmica debe estar entre ${TEMP_MIN}° y ${TEMP_MAX}°` });
   }
-  
+
   // Validar pronóstico
   if (pronostico && pronostico.length > 5) {
     return res.status(400).json({ mensaje: 'El pronóstico no puede tener más de 5 días' });
@@ -263,6 +283,8 @@ const { nombre, descripcion, pronostico, temperatura, sensacion } = req.body;
   }
 
   ciudades[index] = { ...ciudades[index], ...req.body, id: ciudades[index].id };
+  io.emit('ciudades:updated', ciudades[index]);
+  io.emit('alertas:updated', { motivo: 'ciudad_actualizada', ciudad: ciudades[index] });
   res.json(ciudades[index]);
 });
 
@@ -277,9 +299,11 @@ app.delete('/api/ciudades/:id', (req, res) => {
 
   const eliminada = ciudades[index];
   ciudades = ciudades.filter(c => c.id !== id);
+  io.emit('ciudades:deleted', { id: eliminada.id });
+  io.emit('alertas:updated', { motivo: 'ciudad_eliminada', ciudad: eliminada });
   res.json(eliminada);
 });
 
-app.listen(PORT, () => {
-  console.log(`Tempus API corriendo en http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Tempus API + Socket.IO corriendo en http://localhost:${PORT}`);
 });

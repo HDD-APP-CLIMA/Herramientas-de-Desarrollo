@@ -1,6 +1,7 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { Ciudad } from '../models/ciudad.model';
+import { socket } from '../lib/socket';
 
 const API = 'http://localhost:3000/api/ciudades';
 
@@ -22,7 +23,7 @@ export function useCiudades() {
 
     const fetchCiudades = async () => {
       try {
-        setEstado(prev => ({
+        setEstado((prev) => ({
           ...prev,
           loading: true,
           error: null,
@@ -62,7 +63,7 @@ export function useCiudades() {
             ? err.message
             : 'Ocurrió un error inesperado al cargar las ciudades.';
 
-        setEstado(prev => ({
+        setEstado((prev) => ({
           ...prev,
           loading: false,
           error: mensaje,
@@ -74,6 +75,39 @@ export function useCiudades() {
 
     return () => {
       abortController.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const onCreated = (nueva: Ciudad) => {
+      setEstado((prev) => {
+        if (prev.ciudades.some((c) => c.id === nueva.id)) return prev;
+        return { ...prev, ciudades: [...prev.ciudades, nueva] };
+      });
+    };
+
+    const onUpdated = (actualizada: Ciudad) => {
+      setEstado((prev) => ({
+        ...prev,
+        ciudades: prev.ciudades.map((c) => (c.id === actualizada.id ? actualizada : c)),
+      }));
+    };
+
+    const onDeleted = ({ id }: { id: number }) => {
+      setEstado((prev) => ({
+        ...prev,
+        ciudades: prev.ciudades.filter((c) => c.id !== id),
+      }));
+    };
+
+    socket.on('ciudades:created', onCreated);
+    socket.on('ciudades:updated', onUpdated);
+    socket.on('ciudades:deleted', onDeleted);
+
+    return () => {
+      socket.off('ciudades:created', onCreated);
+      socket.off('ciudades:updated', onUpdated);
+      socket.off('ciudades:deleted', onDeleted);
     };
   }, []);
 
