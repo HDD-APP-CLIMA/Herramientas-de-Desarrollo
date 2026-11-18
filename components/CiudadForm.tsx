@@ -108,6 +108,12 @@ export default function CiudadForm() {
     }
   };
 
+  const reiniciarFormulario = () => {
+    // React Hook Form restablece valores, errores, campos tocados y estado dirty.
+    reset();
+    setMensaje(null);
+  };
+
   const nombreLen = watch('nombre')?.length ?? 0;
 
   return (
@@ -438,6 +444,12 @@ export default function CiudadForm() {
                       <><i className={`bi me-1 ${editMode ? 'bi-check-lg' : 'bi-plus-lg'}`}></i>
                         {editMode ? 'Actualizar' : 'Crear ciudad'}</>
                     )}
+                  </button>
+                  <button type="button" className="btn btn-outline-warning py-2 px-3"
+                    onClick={reiniciarFormulario} disabled={isSubmitting}
+                    title={editMode ? 'Restaurar los datos originales' : 'Limpiar el formulario'}>
+                    <i className="bi bi-arrow-counterclockwise me-1"></i>
+                    Reiniciar
                   </button>
                   <NavLink to="/ciudades" className="btn btn-outline-secondary py-2 px-4">
                     Cancelar
