@@ -13,8 +13,8 @@ export default function DetallePanel({ ciudad, esFavorita, onToggleFavorita }: P
       <div className="card-body p-4">
 
         {/* Top */}
-        <div className="d-flex justify-content-between align-items-start mb-3">
-          <div>
+        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2 mb-3">
+          <div className="text-break">
             <h4 className="fw-bold mb-0">{ciudad.nombre}</h4>
             <span className="text-muted">{ciudad.descripcion}</span>
           </div>
@@ -65,7 +65,7 @@ export default function DetallePanel({ ciudad, esFavorita, onToggleFavorita }: P
         <p className="fw-semibold small text-muted text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
           <i className="bi bi-calendar3 me-1"></i>Pronóstico 5 días
         </p>
-        <div className="row row-cols-5 g-2">
+        <div className="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-2">
           {ciudad.pronostico.map((d, i) => (
             <div key={i} className="col">
               <div className="card border-0 bg-light text-center">

@@ -56,12 +56,12 @@ export default function AlertasPanel({ alertas, onSeleccionar }: Props) {
               .filter(a => filtro === 'Todas' || (categoriaDe[a.tipo] ?? a.tipo) === filtro)
               .map((a, j) => (
                 <div key={`${i}-${j}`}
-                  className={`alert alert-${colorNivel[a.nivel]} d-flex gap-2 align-items-baseline mb-0 py-2`}
+                  className={`alert alert-${colorNivel[a.nivel]} d-flex flex-wrap gap-2 align-items-baseline mb-0 py-2`}
                   style={{ cursor: 'pointer' }}
                   onClick={() => onSeleccionar(item.ciudad)}>
-                  <span className="fw-bold text-nowrap">{a.tipo}</span>
-                  <span className="fw-semibold text-nowrap">{item.ciudad}:</span>
-                  <span className="small">{a.mensaje}</span>
+                  <span className="fw-bold">{a.tipo}</span>
+                  <span className="fw-semibold">{item.ciudad}:</span>
+                  <span className="small" style={{ minWidth: 0, overflowWrap: 'anywhere' }}>{a.mensaje}</span>
                 </div>
               ))
           )}
