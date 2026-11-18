@@ -117,7 +117,7 @@ export default function CiudadForm() {
   const nombreLen = watch('nombre')?.length ?? 0;
 
   return (
-    <div className="container py-4">
+    <div className="container py-4 py-lg-5">
       <div className="row justify-content-center">
         <div className="col-md-8 col-lg-7">
 
@@ -134,7 +134,7 @@ export default function CiudadForm() {
           </div>
 
           <div className="card border-0 shadow-sm" style={{ borderRadius: '16px' }}>
-            <div className="card-body p-4">
+            <div className="card-body p-3 p-md-4 p-lg-5">
 
               {mensaje && (
                 <div className={`alert alert-${mensaje.tipo} d-flex align-items-center gap-2 mb-4`}>
