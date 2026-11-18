@@ -27,6 +27,9 @@ export default function CiudadForm() {
   const editMode   = ciudadId !== undefined;
   const [mensaje, setMensaje]       = useState<{ texto: string; tipo: 'success' | 'danger' } | null>(null);
   const [condiciones, setCondiciones] = useState<string[]>([]);
+  const [cargandoCondiciones, setCargandoCondiciones] = useState(true);
+  const [cargandoCiudad, setCargandoCiudad] = useState(editMode);
+  const [envioExitoso, setEnvioExitoso] = useState(false);
 
   // Carga las condiciones válidas desde el API
   useEffect(() => {
@@ -39,7 +42,8 @@ export default function CiudadForm() {
       .catch((e: unknown) => {
         const msg = e instanceof Error ? e.message : 'Error inesperado';
         setMensaje({ texto: `No se pudieron cargar las condiciones. ${msg}`, tipo: 'danger' });
-      });
+      })
+      .finally(() => setCargandoCondiciones(false));
   }, []);
 
   const pronosticoInicial = useMemo(
@@ -83,16 +87,19 @@ export default function CiudadForm() {
 
   useEffect(() => {
     if (ciudadId !== undefined) {
+      setCargandoCiudad(true);
       getById(ciudadId).then(c => {
         reset(c);
       }).catch((e: unknown) => {
         const msg = e instanceof Error ? e.message : 'Error inesperado';
         setMensaje({ texto: `No se pudo cargar la ciudad. ${msg}`, tipo: 'danger' });
-      });
+      }).finally(() => setCargandoCiudad(false));
     }
   }, [ciudadId]);
 
   const onSubmit = async (data: FormValues) => {
+    setEnvioExitoso(false);
+    setMensaje(null);
     try {
       if (ciudadId !== undefined) {
         await actualizar(ciudadId, data);
@@ -100,6 +107,7 @@ export default function CiudadForm() {
         await crear(data);
       }
 
+      setEnvioExitoso(true);
       setMensaje({ texto: editMode ? 'Ciudad actualizada.' : 'Ciudad creada.', tipo: 'success' });
       setTimeout(() => navigate('/ciudades'), 1200);
     } catch (e: unknown) {
@@ -112,7 +120,10 @@ export default function CiudadForm() {
     // React Hook Form restablece valores, errores, campos tocados y estado dirty.
     reset();
     setMensaje(null);
+    setEnvioExitoso(false);
   };
+
+  const cargando = cargandoCondiciones || cargandoCiudad;
 
   const nombreLen = watch('nombre')?.length ?? 0;
 
@@ -137,9 +148,17 @@ export default function CiudadForm() {
             <div className="card-body px-3 py-4 px-md-5 py-md-5">
 
               {mensaje && (
-                <div className={`alert alert-${mensaje.tipo} d-flex align-items-center gap-2 mb-4`}>
+                <div role={mensaje.tipo === 'success' ? 'status' : 'alert'} aria-live="polite"
+                  className={`alert alert-${mensaje.tipo} d-flex align-items-center gap-2 mb-4`}>
                   <i className={`bi ${mensaje.tipo === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'}`}></i>
                   {mensaje.texto}
+                </div>
+              )}
+
+              {cargando && (
+                <div className="d-flex align-items-center gap-2 text-muted mb-4" role="status" aria-live="polite">
+                  <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                  {cargandoCiudad ? 'Cargando datos de la ciudad...' : 'Cargando opciones del formulario...'}
                 </div>
               )}
 
@@ -437,16 +456,18 @@ export default function CiudadForm() {
                 <div className="d-flex gap-2 pt-2">
                   <button type="submit"
                     className="btn btn-primary flex-grow-1 py-2"
-                    disabled={!isValid || isSubmitting}>
+                    disabled={!isValid || isSubmitting || cargando || envioExitoso}>
                     {isSubmitting ? (
                       <><span className="spinner-border spinner-border-sm me-2"></span>Guardando...</>
+                    ) : envioExitoso ? (
+                      <><i className="bi bi-check-circle-fill me-1"></i>Guardado correctamente</>
                     ) : (
                       <><i className={`bi me-1 ${editMode ? 'bi-check-lg' : 'bi-plus-lg'}`}></i>
                         {editMode ? 'Actualizar' : 'Crear ciudad'}</>
                     )}
                   </button>
                   <button type="button" className="btn btn-outline-warning py-2 px-3"
-                    onClick={reiniciarFormulario} disabled={isSubmitting}
+                    onClick={reiniciarFormulario} disabled={isSubmitting || cargando || envioExitoso}
                     title={editMode ? 'Restaurar los datos originales' : 'Limpiar el formulario'}>
                     <i className="bi bi-arrow-counterclockwise me-1"></i>
                     Reiniciar
