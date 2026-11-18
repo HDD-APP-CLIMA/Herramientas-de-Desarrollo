@@ -46,3 +46,8 @@ En dos terminales separadas:
 ## Notas
 - El backend usa datos en memoria (se reinician al reiniciar el servidor).
 - Para probar el tiempo real, abre la aplicación en dos ventanas/navegadores y realiza cambios en las ciudades.
+
+## Solución de problemas
+- **Puerto 3000 en uso (`EADDRINUSE`)**: cierra el proceso que usa el puerto o detén la terminal donde ya corre el servidor (`Ctrl + C`).
+- **No se ven cambios en el navegador**: recarga con `Ctrl + F5` y verifica que backend (`:3000`) y frontend (`:5173`) estén en ejecución.
+- **Dependencias faltantes**: ejecuta `npm.cmd install` en la raíz del proyecto.
