@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { Ciudad } from '../models/ciudad.model';
+import { API_URL } from '../config/api';
 
-const API = 'http://localhost:3000/api/ciudades';
+const API = `${API_URL}/ciudades`;
 
 async function validarRespuesta(response: Response): Promise<void> {
   if (response.ok) return;
@@ -70,7 +71,7 @@ export function useCiudades() {
       });
 
   // Crear ciudad
-  const crear = (d: Omit<Ciudad, 'id'>): Promise<void> =>
+  const crear = (d: Omit<Ciudad, 'id'>): Promise<Ciudad> =>
     fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -78,7 +79,9 @@ export function useCiudades() {
     })
     .then(async res => {
       await validarRespuesta(res);
+      const creada: Ciudad = await res.json();
       refrescar();
+      return creada;
     })
     .catch((e: unknown) => {
       const msg = e instanceof Error ? e.message : String(e);

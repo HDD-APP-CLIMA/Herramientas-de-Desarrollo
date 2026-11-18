@@ -3,6 +3,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { useNavigate, useParams, NavLink } from 'react-router-dom';
 import { useCiudades } from '../hooks/useCiudades';
 import type { Ciudad } from '../models/ciudad.model';
+import { API_URL } from '../config/api';
 
 type FormValues = Omit<Ciudad, 'id'>;
 
@@ -42,7 +43,7 @@ export default function CiudadForm() {
 
   // Carga las condiciones válidas desde el API
   useEffect(() => {
-    fetch('http://localhost:3000/api/condiciones')
+    fetch(`${API_URL}/condiciones`)
       .then(res => {
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         return res.json();
@@ -118,12 +119,13 @@ export default function CiudadForm() {
     try {
       if (ciudadId !== undefined) {
         await actualizar(ciudadId, data);
+        setMensaje({ texto: 'Ciudad actualizada.', tipo: 'success' });
       } else {
-        await crear(data);
+        const ciudadCreada = await crear(data);
+        setMensaje({ texto: `Ciudad "${ciudadCreada.nombre}" creada correctamente.`, tipo: 'success' });
       }
 
       setEnvioExitoso(true);
-      setMensaje({ texto: editMode ? 'Ciudad actualizada.' : 'Ciudad creada.', tipo: 'success' });
       setTimeout(() => navigate('/ciudades'), 1200);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Error inesperado';
