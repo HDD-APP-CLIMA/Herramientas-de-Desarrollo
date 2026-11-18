@@ -1,4 +1,5 @@
 import type { Ciudad } from '../models/ciudad.model';
+import { formatearTemperatura } from '../utils/formato';
 
 interface Props {
   ciudad:          Ciudad;
@@ -12,16 +13,16 @@ export default function DetallePanel({ ciudad, esFavorita, onToggleFavorita }: P
       <div className="card-body p-4">
 
         {/* Top */}
-        <div className="d-flex justify-content-between align-items-start mb-3">
-          <div>
+        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2 mb-3">
+          <div className="text-break">
             <h4 className="fw-bold mb-0">{ciudad.nombre}</h4>
             <span className="text-muted">{ciudad.descripcion}</span>
           </div>
           <div className="text-end">
             <div className="fw-bold" style={{ fontSize: '3rem', color: '#61DAFB', fontFamily: 'monospace', lineHeight: 1 }}>
-              {ciudad.temperatura}°C
+              {formatearTemperatura(ciudad.temperatura)}
             </div>
-            <small className="text-muted">Sensación {ciudad.sensacion}°C</small>
+            <small className="text-muted">Sensación {formatearTemperatura(ciudad.sensacion)}</small>
           </div>
         </div>
 
@@ -64,7 +65,7 @@ export default function DetallePanel({ ciudad, esFavorita, onToggleFavorita }: P
         <p className="fw-semibold small text-muted text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
           <i className="bi bi-calendar3 me-1"></i>Pronóstico 5 días
         </p>
-        <div className="row row-cols-5 g-2">
+        <div className="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-2">
           {ciudad.pronostico.map((d, i) => (
             <div key={i} className="col">
               <div className="card border-0 bg-light text-center">
@@ -72,8 +73,8 @@ export default function DetallePanel({ ciudad, esFavorita, onToggleFavorita }: P
                   <div className="text-muted" style={{ fontSize: '0.65rem', textTransform: 'uppercase', fontFamily: 'monospace' }}>
                     {d.dia}
                   </div>
-                  <div className="fw-bold small" style={{ color: '#61DAFB', fontFamily: 'monospace' }}>{d.max}°</div>
-                  <div className="text-muted small" style={{ fontFamily: 'monospace' }}>/{d.min}°</div>
+                  <div className="fw-bold small" style={{ color: '#61DAFB', fontFamily: 'monospace' }}>{formatearTemperatura(d.max)}</div>
+                  <div className="text-muted small" style={{ fontFamily: 'monospace' }}>{formatearTemperatura(d.min)}</div>
                   <div className="text-muted" style={{ fontSize: '0.65rem' }}>{d.descripcion}</div>
                 </div>
               </div>
@@ -85,3 +86,4 @@ export default function DetallePanel({ ciudad, esFavorita, onToggleFavorita }: P
     </div>
   );
 }
+import { formatearTemperatura } from '../utils/formato';

@@ -1,7 +1,22 @@
 import { useState, useEffect } from 'react';
 import type { Ciudad } from '../models/ciudad.model';
+import { API_URL } from '../config/api';
 
-const API = 'http://localhost:3000/api/ciudades';
+const API = `${API_URL}/ciudades`;
+
+async function validarRespuesta(response: Response): Promise<void> {
+  if (response.ok) return;
+
+  let mensaje: string | undefined;
+  try {
+    const body = await response.json();
+    mensaje = body.mensaje;
+  } catch {
+    // Algunas respuestas de error no incluyen un cuerpo JSON.
+  }
+
+  throw new Error(mensaje ?? `Error: ${response.status}`);
+}
 
 interface Estado {
   ciudades: Ciudad[];
@@ -27,9 +42,7 @@ export function useCiudades() {
 
         const response = await fetch(API, { signal: abortController.signal });
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
+        await validarRespuesta(response);
 
         const data: Ciudad[] = await response.json();
         setEstado({ ciudades: data, loading: false, error: null });
@@ -48,8 +61,8 @@ export function useCiudades() {
   // Obtener ciudad por ID
   const getById = (id: number): Promise<Ciudad> =>
     fetch(`${API}/${id}`)
-      .then(res => {
-        if (!res.ok) throw new Error(`Error: ${res.status}`);
+      .then(async res => {
+        await validarRespuesta(res);
         return res.json();
       })
       .catch((e: unknown) => {
@@ -58,18 +71,17 @@ export function useCiudades() {
       });
 
   // Crear ciudad
-  const crear = (d: Omit<Ciudad, 'id'>): Promise<void> =>
+  const crear = (d: Omit<Ciudad, 'id'>): Promise<Ciudad> =>
     fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(d),
     })
     .then(async res => {
-      if (!res.ok) {
-        const body = await res.json();
-        throw new Error(body.mensaje ?? `Error: ${res.status}`);
-      }
+      await validarRespuesta(res);
+      const creada: Ciudad = await res.json();
       refrescar();
+      return creada;
     })
     .catch((e: unknown) => {
       const msg = e instanceof Error ? e.message : String(e);
@@ -84,10 +96,7 @@ export function useCiudades() {
       body: JSON.stringify(d),
     })
       .then(async res => {
-        if (!res.ok) {
-          const body = await res.json();
-          throw new Error(body.mensaje ?? `Error: ${res.status}`);
-        }
+        await validarRespuesta(res);
         refrescar();
       })
       .catch((e: unknown) => {
@@ -98,8 +107,8 @@ export function useCiudades() {
   // Eliminar ciudad
   const eliminar = (id: number) =>
     fetch(`${API}/${id}`, { method: 'DELETE' })
-      .then(res => {
-        if (!res.ok) throw new Error(`Error: ${res.status}`);
+      .then(async res => {
+        await validarRespuesta(res);
         refrescar();
       })
       .catch((e: unknown) => {

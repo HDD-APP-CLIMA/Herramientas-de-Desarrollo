@@ -1,0 +1,173 @@
+[33mcommit 6054052a08af462d0fa39046fefefc8eb128b32f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mJerson[m[33m, [m[1;31morigin/Jerson[m[33m)[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Tue Nov 17 22:57:01 2026 -0500
+
+    añadi restricciones de caracteres máximos y mínimos en los inputs
+
+[33mcommit a13e75511c9626f5f53db507181ba16d4e4ecb04[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Tue Nov 17 22:52:30 2026 -0500
+
+    incorporar manejo de estados de carga y envío exitoso en el formulalio
+
+[33mcommit f5e4c985d976ea0358d364c24398bd71be3f8fa8[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Tue Nov 17 22:40:50 2026 -0500
+
+    Corregi un desbordamiento de elementos en la vista adaptable.
+
+[33mcommit ebb1b4b11db16571305192e121fc7dc78b607d2a[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Tue Nov 17 22:37:10 2026 -0500
+
+    Cambio en el color de texto del título secundario.
+
+[33mcommit f72611106a4e21a4b46134e9f7c2d9dc089e377e[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Tue Nov 17 22:35:16 2026 -0500
+
+    Agregar nuevas variables de configuración opcionales en el archivo .env.example.
+
+[33mcommit 5a88509729a6756bae3e15df0831f32ec80fae40[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Tue Nov 17 22:33:30 2026 -0500
+
+    Actualizar la sección de instrucciones de ejecución local.
+
+[33mcommit 3783b110729f2d00559a52e2594f518d32212e55[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Tue Nov 17 22:24:52 2026 -0500
+
+    Ajustar el espaciado y padding del contenedor principal de la tarjeta.
+
+[33mcommit 79b21039b3f689a921577aa8f1a0de824ea33a81[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Tue Nov 17 22:22:23 2026 -0500
+
+    Implementar botón de reinicio y limpieza avanzada en el formulario principal.
+
+[33mcommit d3fe67b03d55982ead00d3f5e789ece1ed3b0a77[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Tue Nov 17 22:20:13 2026 -0500
+
+    validación en tiempo real para los campos obligatorios del formulario de ciudades
+
+[33mcommit 2defb492c93a7bc0303f4b69b9bd245020e82542[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Oct 21 01:14:17 2026 -0500
+
+    docs: agregar sección de requisitos e instalación en el README
+
+[33mcommit 00eba6b009a9fc0e3a2aab64804b4874b0f1828a[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Oct 21 01:12:48 2026 -0500
+
+    refactor: separar lógica de componentes en archivos independientes
+
+[33mcommit e5f64a1e3281728fc8001d4d1723db175a44fadc[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Oct 21 01:11:10 2026 -0500
+
+    style: actualizar paleta de colores en elementos interactivos
+
+[33mcommit eccc29a21fa03854a29f75d1f7cc2f2b451c10fa[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Oct 21 01:09:31 2026 -0500
+
+    feat: agregar nueva función de utilidad para formatear fechas
+
+[33mcommit 63b144f7be24ab895f67ef2b66d5fb21695391a6[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Oct 21 01:08:09 2026 -0500
+
+    fix: corregir manejo de errores en solicitud HTTP
+
+[33mcommit 4850076399a90bd94a2656cf705fbed2368b1770[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Oct 21 01:05:54 2026 -0500
+
+    chore: configurar puerto por defecto en archivo de entorno
+
+[33mcommit a8c0a2c0637b7fa306109ee2fa0653abfd22a7de[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Oct 21 01:02:10 2026 -0500
+
+    refactor: mejorar nombres de variables internas en configuración
+
+[33mcommit 87a07ac4afb346599e7851c199670a53c2012e3e[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Oct 21 00:59:06 2026 -0500
+
+    style: ajustar espacios y márgenes en la hoja de estilos
+
+[33mcommit 848492d18863ef1522e593bcc00563ea536a72fc[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Oct 21 00:56:07 2026 -0500
+
+    docs: actualizar descripción básica en el archivo README
+
+[33mcommit 97013e7b57f4f89b124008e116fff09bdbc8a73e[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Sep 16 01:29:49 2026 -0500
+
+    mejore la legibilidad del login
+
+[33mcommit 73fadc21cf27d31b17b429cc758b98cf60cacdba[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Sep 16 01:25:51 2026 -0500
+
+    Añadi el manejo de error a la carda de condicions del API
+
+[33mcommit d6466527d6869d6680a5e945e951e6b0564a9ae7[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Sep 16 01:21:43 2026 -0500
+
+    Mejorar el pronosticoInicial
+
+[33mcommit 64064768b5f545ed6940ae7b20a203a638951983[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Sep 16 01:17:49 2026 -0500
+
+    use un reset de Reat Hook Fromal cargar una ciudad
+
+[33mcommit 82c96830f5c68b90691da9428337683da8614d73[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Sep 16 00:58:55 2026 -0500
+
+    Cree una constante para convertir y validad el id de la ruta
+
+[33mcommit 23ed2f3204544e37235c8565644443e9ad760e1a[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Sep 16 00:30:45 2026 -0500
+
+    Centralize el SESSIONKEY para que no se repita
+
+[33mcommit 728a2ea0a09c42dc2c15eff1ff64c179c6174cae[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Wed Sep 16 00:24:58 2026 -0500
+
+    optimizacion de las URLs del APi
+
+[33mcommit 7263187d83046af94e1d57fad446958c3a3c034c[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Mon Sep 14 22:21:20 2026 -0500
+
+    Actualice las CiudadList.tsx para optimizar mejor la lista de filtar ciudades
+
+[33mcommit 7e62db2b40ec3f6321b5770eb47de754ff0019c9[m
+Author: JersonOlivares <jersonolivares@Lenovo01.JersonOlivares>
+Date:   Mon Sep 14 22:10:08 2026 -0500
+
+    Cambios en la visualizacion de la pagina
+
+[33mcommit 3aaf8bc5b7d726d92fb1cebeb44c8d2bc62b3b46[m[33m ([m[1;32mmain[m[33m)[m
+Author: Cristopher Vera Quinde <cvequin@hotmail.com>
+Date:   Thu Sep 10 12:19:49 2026 -0500
+
+    proyecto
+
+[33mcommit 003809d6d6432752d43113213f9e2c26e47bc2ae[m
+Author: Cristopher Vera Quinde <cvequin@hotmail.com>
+Date:   Thu Sep 10 11:59:11 2026 -0500
+
+    first commit

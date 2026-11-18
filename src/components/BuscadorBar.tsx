@@ -9,8 +9,8 @@ interface Props {
     return (
       <div className="card border-0 shadow-sm">
         <div className="card-body">
-          <div className="d-flex gap-2 align-items-center">
-            <div className="input-group flex-grow-1">
+          <div className="d-flex flex-column flex-sm-row gap-2 align-items-stretch align-items-sm-center">
+            <div className="input-group flex-grow-1" style={{ minWidth: 0 }}>
               <span className="input-group-text bg-white border-end-0">
                 <i className="bi bi-search text-muted"></i>
               </span>

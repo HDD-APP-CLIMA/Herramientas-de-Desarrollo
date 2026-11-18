@@ -3,11 +3,40 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { useNavigate, useParams, NavLink } from 'react-router-dom';
 import { useCiudades } from '../hooks/useCiudades';
 import type { Ciudad } from '../models/ciudad.model';
+import { API_URL } from '../config/api';
 
 type FormValues = Omit<Ciudad, 'id'>;
 
 const TEMP_MIN = -30;
 const TEMP_MAX = 50;
+const NOMBRE_MIN_CARACTERES = 2;
+const NOMBRE_MAX_CARACTERES = 100;
+const CONDICIONES_CON_PRECIPITACION = [
+  'Garúa',
+  'Lluvia ligera',
+  'Lluvia moderada',
+  'Lluvia intensa',
+  'Tormenta',
+];
+
+const obtenerMensajeError = (error: unknown): string => {
+  if (error instanceof TypeError) {
+    return 'No se pudo conectar con el servidor. Verifica que la API esté en ejecución.';
+  }
+
+  if (error instanceof Error && error.message.trim()) return error.message;
+  if (typeof error === 'string' && error.trim()) return error;
+
+  if (error && typeof error === 'object') {
+    const detalle = error as Record<string, unknown>;
+    for (const campo of ['mensaje', 'message', 'error']) {
+      const valor = detalle[campo];
+      if (typeof valor === 'string' && valor.trim()) return valor;
+    }
+  }
+
+  return 'Ocurrió un error inesperado al guardar la ciudad.';
+};
 
 const obtenerProximosDias = (): string[] => {
   const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -27,10 +56,13 @@ export default function CiudadForm() {
   const editMode   = ciudadId !== undefined;
   const [mensaje, setMensaje]       = useState<{ texto: string; tipo: 'success' | 'danger' } | null>(null);
   const [condiciones, setCondiciones] = useState<string[]>([]);
+  const [cargandoCondiciones, setCargandoCondiciones] = useState(true);
+  const [cargandoCiudad, setCargandoCiudad] = useState(editMode);
+  const [envioExitoso, setEnvioExitoso] = useState(false);
 
   // Carga las condiciones válidas desde el API
   useEffect(() => {
-    fetch('http://localhost:3000/api/condiciones')
+    fetch(`${API_URL}/condiciones`)
       .then(res => {
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         return res.json();
@@ -39,7 +71,8 @@ export default function CiudadForm() {
       .catch((e: unknown) => {
         const msg = e instanceof Error ? e.message : 'Error inesperado';
         setMensaje({ texto: `No se pudieron cargar las condiciones. ${msg}`, tipo: 'danger' });
-      });
+      })
+      .finally(() => setCargandoCondiciones(false));
   }, []);
 
   const pronosticoInicial = useMemo(
@@ -57,12 +90,14 @@ export default function CiudadForm() {
     handleSubmit,
     reset,
     watch,
+    setValue,
     control,
-    formState: { errors, isSubmitting, isValid }
+    formState: { errors, isSubmitting }
   } = useForm<FormValues>({
     defaultValues: {
       nombre:        '',
       temperatura:   0,
+      temperaturaMaxima: 0,
       sensacion:     0,
       descripcion:   '',
       humedad:       0,
@@ -81,34 +116,55 @@ export default function CiudadForm() {
     name: 'pronostico',
   });
 
+  const descripcionRegistro = register('descripcion', { required: 'La descripción es obligatoria.' });
+  const descripcionActual = watch('descripcion');
+  const mostrarPrecipitacion = CONDICIONES_CON_PRECIPITACION.includes(descripcionActual);
+
   useEffect(() => {
     if (ciudadId !== undefined) {
+      setCargandoCiudad(true);
       getById(ciudadId).then(c => {
         reset(c);
-      });
+      }).catch((e: unknown) => {
+        const msg = e instanceof Error ? e.message : 'Error inesperado';
+        setMensaje({ texto: `No se pudo cargar la ciudad. ${msg}`, tipo: 'danger' });
+      }).finally(() => setCargandoCiudad(false));
     }
   }, [ciudadId]);
 
   const onSubmit = async (data: FormValues) => {
+    setEnvioExitoso(false);
+    setMensaje(null);
     try {
       if (ciudadId !== undefined) {
         await actualizar(ciudadId, data);
+        setMensaje({ texto: 'Ciudad actualizada.', tipo: 'success' });
       } else {
-        await crear(data);
+        const ciudadCreada = await crear(data);
+        setMensaje({ texto: `Ciudad "${ciudadCreada.nombre}" creada correctamente.`, tipo: 'success' });
       }
 
-      setMensaje({ texto: editMode ? 'Ciudad actualizada.' : 'Ciudad creada.', tipo: 'success' });
+      setEnvioExitoso(true);
       setTimeout(() => navigate('/ciudades'), 1200);
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Error inesperado';
-      setMensaje({ texto: msg, tipo: 'danger' });
+      setEnvioExitoso(false);
+      setMensaje({ texto: obtenerMensajeError(e), tipo: 'danger' });
     }
   };
+
+  const reiniciarFormulario = () => {
+    // React Hook Form restablece valores, errores, campos tocados y estado dirty.
+    reset();
+    setMensaje(null);
+    setEnvioExitoso(false);
+  };
+
+  const cargando = cargandoCondiciones || cargandoCiudad;
 
   const nombreLen = watch('nombre')?.length ?? 0;
 
   return (
-    <div className="container py-4">
+    <div className="container py-4 py-lg-5">
       <div className="row justify-content-center">
         <div className="col-md-8 col-lg-7">
 
@@ -124,17 +180,25 @@ export default function CiudadForm() {
             </h2>
           </div>
 
-          <div className="card border-0 shadow-sm" style={{ borderRadius: '16px' }}>
-            <div className="card-body p-4">
+          <div className="card border-0 shadow-sm mt-3 mb-4" style={{ borderRadius: '16px' }}>
+            <div className="card-body px-3 py-4 px-md-5 py-md-5">
 
               {mensaje && (
-                <div className={`alert alert-${mensaje.tipo} d-flex align-items-center gap-2 mb-4`}>
+                <div role={mensaje.tipo === 'success' ? 'status' : 'alert'} aria-live="polite"
+                  className={`alert alert-${mensaje.tipo} d-flex align-items-center gap-2 mb-4`}>
                   <i className={`bi ${mensaje.tipo === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'}`}></i>
                   {mensaje.texto}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit(onSubmit)}>
+              {cargando && (
+                <div className="d-flex align-items-center gap-2 text-muted mb-4" role="status" aria-live="polite">
+                  <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                  {cargandoCiudad ? 'Cargando datos de la ciudad...' : 'Cargando opciones del formulario...'}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
                 {/* Nombre */}
                 <div className="mb-3">
@@ -142,23 +206,30 @@ export default function CiudadForm() {
                     <i className="bi bi-geo-alt me-1"></i>Nombre de la ciudad
                   </label>
                   <input
+                    type="text"
+                    required
+                    minLength={NOMBRE_MIN_CARACTERES}
+                    maxLength={NOMBRE_MAX_CARACTERES}
                     className={`form-control form-control-lg
                       ${errors.nombre ? 'is-invalid' : nombreLen > 0 ? 'is-valid' : ''}`}
                     placeholder="Ej: Lima, Cusco, Arequipa..."
                     {...register('nombre', {
-                      required:  'El nombre es obligatorio.',
-                      minLength: { value: 2,   message: 'Mínimo 2 caracteres.'   },
-                      maxLength: { value: 100, message: 'Máximo 100 caracteres.' },
-                      validate: val => {
-                        const existe = ciudades.find(
-                          c => c.nombre.toLowerCase() === val.trim().toLowerCase() && c.id !== ciudadId
-                        );
-                        return !existe || `Ya existe una ciudad llamada "${val.trim()}"`;
-                      }
+                      required: 'Ingresa el nombre de la ciudad antes de enviar.',
+                      validate: {
+                        noVacio: val => Boolean(val.trim()) || 'Ingresa el nombre de la ciudad antes de enviar.',
+                        unico: val => {
+                          const existe = ciudades.find(
+                            c => c.nombre.toLowerCase() === val.trim().toLowerCase() && c.id !== ciudadId
+                          );
+                          return !existe || `Ya existe una ciudad llamada "${val.trim()}"`;
+                        },
+                      },
+                      minLength: { value: NOMBRE_MIN_CARACTERES, message: `Mínimo ${NOMBRE_MIN_CARACTERES} caracteres.` },
+                      maxLength: { value: NOMBRE_MAX_CARACTERES, message: `Máximo ${NOMBRE_MAX_CARACTERES} caracteres.` },
                     })}
                   />
                   {errors.nombre && (
-                    <div className="invalid-feedback d-block">{errors.nombre.message}</div>
+                    <div className="text-danger small mt-1" role="alert">{errors.nombre.message}</div>
                   )}
                   <div className="d-flex justify-content-end mt-1">
                     <small className={nombreLen > 90 ? 'text-danger' : 'text-muted'}>
@@ -174,7 +245,13 @@ export default function CiudadForm() {
                   </label>
                   <select
                     className={`form-select ${errors.descripcion ? 'is-invalid' : ''}`}
-                    {...register('descripcion', { required: 'La descripción es obligatoria.' })}
+                    {...descripcionRegistro}
+                    onChange={event => {
+                      descripcionRegistro.onChange(event);
+                      if (!CONDICIONES_CON_PRECIPITACION.includes(event.target.value)) {
+                        setValue('precipitacion', 0, { shouldValidate: true });
+                      }
+                    }}
                   >
                     <option value="">Selecciona una descripción...</option>
                     {condiciones.map(c => <option key={c}>{c}</option>)}
@@ -184,9 +261,9 @@ export default function CiudadForm() {
                   )}
                 </div>
 
-                {/* Temperatura y Sensacion */}
+                {/* Temperatura actual, máxima y sensación */}
                 <div className="row g-3 mb-3">
-                  <div className="col-6">
+                  <div className="col-6 col-md-4">
                     <label className="form-label fw-semibold">
                       <i className="bi bi-thermometer-half me-1"></i>Temperatura (°C)
                     </label>
@@ -203,7 +280,24 @@ export default function CiudadForm() {
                       <div className="invalid-feedback d-block">{errors.temperatura.message}</div>
                     )}
                   </div>
-                  <div className="col-6">
+                  <div className="col-6 col-md-4">
+                    <label className="form-label fw-semibold">
+                      <i className="bi bi-thermometer-high me-1"></i>Temperatura máxima (°C)
+                    </label>
+                    <input type="number"
+                      className={`form-control ${errors.temperaturaMaxima ? 'is-invalid' : ''}`}
+                      {...register('temperaturaMaxima', {
+                        required: 'Obligatorio.',
+                        valueAsNumber: true,
+                        min: { value: TEMP_MIN, message: `Mínimo ${TEMP_MIN}°.` },
+                        max: { value: TEMP_MAX, message: `Máximo ${TEMP_MAX}°.` },
+                      })}
+                    />
+                    {errors.temperaturaMaxima && (
+                      <div className="invalid-feedback d-block">{errors.temperaturaMaxima.message}</div>
+                    )}
+                  </div>
+                  <div className="col-6 col-md-4">
                     <label className="form-label fw-semibold">
                       <i className="bi bi-thermometer me-1"></i>Sensación (°C)
                     </label>
@@ -261,23 +355,25 @@ export default function CiudadForm() {
 
                 {/* Precipitacion y Presion */}
                 <div className="row g-3 mb-3">
-                  <div className="col-6">
-                    <label className="form-label fw-semibold">
-                      <i className="bi bi-cloud-rain me-1"></i>Precipitación (mm)
-                    </label>
-                    <input type="number" min="0"
-                      className={`form-control ${errors.precipitacion ? 'is-invalid' : ''}`}
-                      {...register('precipitacion', {
-                        required: 'Obligatorio.',
-                        min: { value: 0, message: 'No puede ser negativo.' },
-                        valueAsNumber: true,
-                      })}
-                    />
-                    {errors.precipitacion && (
-                      <div className="invalid-feedback d-block">{errors.precipitacion.message}</div>
-                    )}
-                  </div>
-                  <div className="col-6">
+                  {mostrarPrecipitacion && (
+                    <div className="col-6">
+                      <label className="form-label fw-semibold">
+                        <i className="bi bi-cloud-rain me-1"></i>Precipitación (mm)
+                      </label>
+                      <input type="number" min="0"
+                        className={`form-control ${errors.precipitacion ? 'is-invalid' : ''}`}
+                        {...register('precipitacion', {
+                          required: 'Obligatorio.',
+                          min: { value: 0, message: 'No puede ser negativo.' },
+                          valueAsNumber: true,
+                        })}
+                      />
+                      {errors.precipitacion && (
+                        <div className="invalid-feedback d-block">{errors.precipitacion.message}</div>
+                      )}
+                    </div>
+                  )}
+                  <div className={mostrarPrecipitacion ? 'col-6' : 'col-12'}>
                     <label className="form-label fw-semibold">
                       <i className="bi bi-speedometer2 me-1"></i>Presión (hPa)
                     </label>
@@ -362,7 +458,7 @@ export default function CiudadForm() {
                             <input type="number"
                               className={`form-control form-control-sm ${errors.pronostico?.[index]?.max ? 'is-invalid' : ''}`}
                               {...register(`pronostico.${index}.max`, {
-                                required: true,
+                                required: 'La temperatura máxima es obligatoria.',
                                 valueAsNumber: true,
                                 min: { value: TEMP_MIN, message: `Mín ${TEMP_MIN}°.` },
                                 max: { value: TEMP_MAX, message: `Máx ${TEMP_MAX}°.` },
@@ -383,7 +479,7 @@ export default function CiudadForm() {
                             <input type="number"
                               className={`form-control form-control-sm ${errors.pronostico?.[index]?.min ? 'is-invalid' : ''}`}
                               {...register(`pronostico.${index}.min`, {
-                                required: true,
+                                required: 'La temperatura mínima es obligatoria.',
                                 valueAsNumber: true,
                                 min: { value: TEMP_MIN, message: `Mín ${TEMP_MIN}°.` },
                                 max: { value: TEMP_MAX, message: `Máx ${TEMP_MAX}°.` },
@@ -403,11 +499,16 @@ export default function CiudadForm() {
                             <label className="form-label small fw-semibold mb-1">Descripción</label>
                             <select
                               className={`form-select form-select-sm ${errors.pronostico?.[index]?.descripcion ? 'is-invalid' : ''}`}
-                              {...register(`pronostico.${index}.descripcion`, { required: true })}
+                              {...register(`pronostico.${index}.descripcion`, { required: 'La descripción es obligatoria.' })}
                             >
                               <option value="">Clima...</option>
                               {condiciones.map(c => <option key={c}>{c}</option>)}
                             </select>
+                            {errors.pronostico?.[index]?.descripcion && (
+                              <div className="invalid-feedback d-block">
+                                {errors.pronostico[index]?.descripcion?.message}
+                              </div>
+                            )}
                           </div>
 
                         </div>
@@ -420,13 +521,21 @@ export default function CiudadForm() {
                 <div className="d-flex gap-2 pt-2">
                   <button type="submit"
                     className="btn btn-primary flex-grow-1 py-2"
-                    disabled={!isValid || isSubmitting}>
+                    disabled={isSubmitting || cargando || envioExitoso}>
                     {isSubmitting ? (
                       <><span className="spinner-border spinner-border-sm me-2"></span>Guardando...</>
+                    ) : envioExitoso ? (
+                      <><i className="bi bi-check-circle-fill me-1"></i>Guardado correctamente</>
                     ) : (
                       <><i className={`bi me-1 ${editMode ? 'bi-check-lg' : 'bi-plus-lg'}`}></i>
                         {editMode ? 'Actualizar' : 'Crear ciudad'}</>
                     )}
+                  </button>
+                  <button type="button" className="btn btn-outline-warning py-2 px-3"
+                    onClick={reiniciarFormulario} disabled={isSubmitting || cargando || envioExitoso}
+                    title={editMode ? 'Restaurar los datos originales' : 'Limpiar el formulario'}>
+                    <i className="bi bi-arrow-counterclockwise me-1"></i>
+                    Reiniciar
                   </button>
                   <NavLink to="/ciudades" className="btn btn-outline-secondary py-2 px-4">
                     Cancelar
