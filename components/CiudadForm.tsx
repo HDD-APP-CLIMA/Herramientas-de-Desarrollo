@@ -10,6 +10,13 @@ const TEMP_MIN = -30;
 const TEMP_MAX = 50;
 const NOMBRE_MIN_CARACTERES = 2;
 const NOMBRE_MAX_CARACTERES = 100;
+const CONDICIONES_CON_PRECIPITACION = [
+  'Garúa',
+  'Lluvia ligera',
+  'Lluvia moderada',
+  'Lluvia intensa',
+  'Tormenta',
+];
 
 const obtenerProximosDias = (): string[] => {
   const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -63,6 +70,7 @@ export default function CiudadForm() {
     handleSubmit,
     reset,
     watch,
+    setValue,
     control,
     formState: { errors, isSubmitting }
   } = useForm<FormValues>({
@@ -87,6 +95,10 @@ export default function CiudadForm() {
     control,
     name: 'pronostico',
   });
+
+  const descripcionRegistro = register('descripcion', { required: 'La descripción es obligatoria.' });
+  const descripcionActual = watch('descripcion');
+  const mostrarPrecipitacion = CONDICIONES_CON_PRECIPITACION.includes(descripcionActual);
 
   useEffect(() => {
     if (ciudadId !== undefined) {
@@ -212,7 +224,13 @@ export default function CiudadForm() {
                   </label>
                   <select
                     className={`form-select ${errors.descripcion ? 'is-invalid' : ''}`}
-                    {...register('descripcion', { required: 'La descripción es obligatoria.' })}
+                    {...descripcionRegistro}
+                    onChange={event => {
+                      descripcionRegistro.onChange(event);
+                      if (!CONDICIONES_CON_PRECIPITACION.includes(event.target.value)) {
+                        setValue('precipitacion', 0, { shouldValidate: true });
+                      }
+                    }}
                   >
                     <option value="">Selecciona una descripción...</option>
                     {condiciones.map(c => <option key={c}>{c}</option>)}
@@ -316,23 +334,25 @@ export default function CiudadForm() {
 
                 {/* Precipitacion y Presion */}
                 <div className="row g-3 mb-3">
-                  <div className="col-6">
-                    <label className="form-label fw-semibold">
-                      <i className="bi bi-cloud-rain me-1"></i>Precipitación (mm)
-                    </label>
-                    <input type="number" min="0"
-                      className={`form-control ${errors.precipitacion ? 'is-invalid' : ''}`}
-                      {...register('precipitacion', {
-                        required: 'Obligatorio.',
-                        min: { value: 0, message: 'No puede ser negativo.' },
-                        valueAsNumber: true,
-                      })}
-                    />
-                    {errors.precipitacion && (
-                      <div className="invalid-feedback d-block">{errors.precipitacion.message}</div>
-                    )}
-                  </div>
-                  <div className="col-6">
+                  {mostrarPrecipitacion && (
+                    <div className="col-6">
+                      <label className="form-label fw-semibold">
+                        <i className="bi bi-cloud-rain me-1"></i>Precipitación (mm)
+                      </label>
+                      <input type="number" min="0"
+                        className={`form-control ${errors.precipitacion ? 'is-invalid' : ''}`}
+                        {...register('precipitacion', {
+                          required: 'Obligatorio.',
+                          min: { value: 0, message: 'No puede ser negativo.' },
+                          valueAsNumber: true,
+                        })}
+                      />
+                      {errors.precipitacion && (
+                        <div className="invalid-feedback d-block">{errors.precipitacion.message}</div>
+                      )}
+                    </div>
+                  )}
+                  <div className={mostrarPrecipitacion ? 'col-6' : 'col-12'}>
                     <label className="form-label fw-semibold">
                       <i className="bi bi-speedometer2 me-1"></i>Presión (hPa)
                     </label>
