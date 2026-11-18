@@ -1,6 +1,7 @@
 {
   "name": "tempus",
   "version": "1.0.0",
+  "description": "Aplicación de clima en tiempo real con React, Express y Socket.IO",
   "private": true,
   "scripts": {
     "dev": "vite",
