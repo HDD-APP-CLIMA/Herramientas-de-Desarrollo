@@ -133,8 +133,8 @@ export default function CiudadForm() {
             </h2>
           </div>
 
-          <div className="card border-0 shadow-sm" style={{ borderRadius: '16px' }}>
-            <div className="card-body p-3 p-md-4 p-lg-5">
+          <div className="card border-0 shadow-sm mt-3 mb-4" style={{ borderRadius: '16px' }}>
+            <div className="card-body px-3 py-4 px-md-5 py-md-5">
 
               {mensaje && (
                 <div className={`alert alert-${mensaje.tipo} d-flex align-items-center gap-2 mb-4`}>
