@@ -39,7 +39,7 @@ export default function Login() {
         <div className="text-center mb-4">
           <i className="bi bi-cloud-sun fs-1" style={{ color: '#61DAFB' }}></i>
           <h1 className="fw-bold mt-2 mb-0" style={{ color: '#20232A' }}>Tempus</h1>
-          <p className="text-muted small">Panel de administración</p>
+          <p className="small" style={{ color: '#495057' }}>Panel de administración</p>
         </div>
 
         <div className="card border-0 shadow-sm" style={{ borderRadius: '16px' }}>
