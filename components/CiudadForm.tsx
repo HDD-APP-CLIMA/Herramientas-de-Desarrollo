@@ -150,14 +150,17 @@ export default function CiudadForm() {
                     placeholder="Ej: Lima, Cusco, Arequipa..."
                     {...register('nombre', {
                       required:  'El nombre es obligatorio.',
+                      validate: {
+                        noVacio: val => Boolean(val.trim()) || 'El nombre es obligatorio.',
+                        unico: val => {
+                          const existe = ciudades.find(
+                            c => c.nombre.toLowerCase() === val.trim().toLowerCase() && c.id !== ciudadId
+                          );
+                          return !existe || `Ya existe una ciudad llamada "${val.trim()}"`;
+                        },
+                      },
                       minLength: { value: 2,   message: 'Mínimo 2 caracteres.'   },
                       maxLength: { value: 100, message: 'Máximo 100 caracteres.' },
-                      validate: val => {
-                        const existe = ciudades.find(
-                          c => c.nombre.toLowerCase() === val.trim().toLowerCase() && c.id !== ciudadId
-                        );
-                        return !existe || `Ya existe una ciudad llamada "${val.trim()}"`;
-                      }
                     })}
                   />
                   {errors.nombre && (
@@ -365,7 +368,7 @@ export default function CiudadForm() {
                             <input type="number"
                               className={`form-control form-control-sm ${errors.pronostico?.[index]?.max ? 'is-invalid' : ''}`}
                               {...register(`pronostico.${index}.max`, {
-                                required: true,
+                                required: 'La temperatura máxima es obligatoria.',
                                 valueAsNumber: true,
                                 min: { value: TEMP_MIN, message: `Mín ${TEMP_MIN}°.` },
                                 max: { value: TEMP_MAX, message: `Máx ${TEMP_MAX}°.` },
@@ -386,7 +389,7 @@ export default function CiudadForm() {
                             <input type="number"
                               className={`form-control form-control-sm ${errors.pronostico?.[index]?.min ? 'is-invalid' : ''}`}
                               {...register(`pronostico.${index}.min`, {
-                                required: true,
+                                required: 'La temperatura mínima es obligatoria.',
                                 valueAsNumber: true,
                                 min: { value: TEMP_MIN, message: `Mín ${TEMP_MIN}°.` },
                                 max: { value: TEMP_MAX, message: `Máx ${TEMP_MAX}°.` },
@@ -406,11 +409,16 @@ export default function CiudadForm() {
                             <label className="form-label small fw-semibold mb-1">Descripción</label>
                             <select
                               className={`form-select form-select-sm ${errors.pronostico?.[index]?.descripcion ? 'is-invalid' : ''}`}
-                              {...register(`pronostico.${index}.descripcion`, { required: true })}
+                              {...register(`pronostico.${index}.descripcion`, { required: 'La descripción es obligatoria.' })}
                             >
                               <option value="">Clima...</option>
                               {condiciones.map(c => <option key={c}>{c}</option>)}
                             </select>
+                            {errors.pronostico?.[index]?.descripcion && (
+                              <div className="invalid-feedback d-block">
+                                {errors.pronostico[index]?.descripcion?.message}
+                              </div>
+                            )}
                           </div>
 
                         </div>
