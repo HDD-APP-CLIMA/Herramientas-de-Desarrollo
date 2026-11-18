@@ -19,6 +19,25 @@ const CONDICIONES_CON_PRECIPITACION = [
   'Tormenta',
 ];
 
+const obtenerMensajeError = (error: unknown): string => {
+  if (error instanceof TypeError) {
+    return 'No se pudo conectar con el servidor. Verifica que la API esté en ejecución.';
+  }
+
+  if (error instanceof Error && error.message.trim()) return error.message;
+  if (typeof error === 'string' && error.trim()) return error;
+
+  if (error && typeof error === 'object') {
+    const detalle = error as Record<string, unknown>;
+    for (const campo of ['mensaje', 'message', 'error']) {
+      const valor = detalle[campo];
+      if (typeof valor === 'string' && valor.trim()) return valor;
+    }
+  }
+
+  return 'Ocurrió un error inesperado al guardar la ciudad.';
+};
+
 const obtenerProximosDias = (): string[] => {
   const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   const hoy = new Date();
@@ -128,8 +147,8 @@ export default function CiudadForm() {
       setEnvioExitoso(true);
       setTimeout(() => navigate('/ciudades'), 1200);
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Error inesperado';
-      setMensaje({ texto: msg, tipo: 'danger' });
+      setEnvioExitoso(false);
+      setMensaje({ texto: obtenerMensajeError(e), tipo: 'danger' });
     }
   };
 
