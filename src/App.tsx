@@ -1,8 +1,14 @@
-const API_KEY =
-  localStorage.getItem("openweather_api_key") ||
-  window.prompt("Ingresa tu clave de OpenWeather") ||
-  "";
+import './App.css';
+import Header from './components/Header';
+import VistaClima from './components/VistaClima';
 
-if (API_KEY) {
-  localStorage.setItem("openweather_api_key", API_KEY);
+export default function App() {
+  return (
+    <>
+      <Header />
+      <main className="container py-4">
+        <VistaClima />
+      </main>
+    </>
+  );
 }
