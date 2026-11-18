@@ -3,12 +3,15 @@ const express = require('express');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:5174')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
 
 // CORS para ambas apps
 app.use((req, res, next) => {
-  const allowed = ['http://localhost:5173', 'http://localhost:5174'];
   const origin  = req.headers.origin;
-  if (allowed.includes(origin)) {
+  if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');

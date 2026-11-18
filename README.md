@@ -27,7 +27,7 @@ Crea el archivo `.env` a partir de la plantilla (o edítalo si ya existe):
 cp .env.example .env
 ```
 
-La configuración predeterminada usa `PORT=3000` para la API y `VITE_API_URL=http://localhost:3000/api` para la interfaz.
+La configuración predeterminada usa `PORT=3000` para la API, `VITE_API_URL=http://localhost:3000/api` para la interfaz y permite los orígenes `http://localhost:5173` y `http://localhost:5174` mediante CORS. Puedes cambiar el puerto y los orígenes permitidos con `PORT` y `CORS_ORIGINS` en `.env`; esta última acepta una lista separada por comas.
 
 Abre dos terminales desde la carpeta del proyecto. En la primera, inicia la API:
 
@@ -43,6 +43,6 @@ En la segunda, inicia la interfaz con Vite:
 npx vite --host 0.0.0.0
 ```
 
-Abre `http://localhost:5173` en el navegador. Ese origen está habilitado en CORS por la API.
+Abre `http://localhost:5173` en el navegador. Ese origen está incluido en la configuración CORS predeterminada de la API.
 
 La API usa datos en memoria para esta demostración. Las ciudades creadas o modificadas se reinician al detener el servidor.
