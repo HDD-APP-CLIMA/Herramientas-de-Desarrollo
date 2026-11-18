@@ -23,14 +23,15 @@ export default function AlertasPanel({ alertas, onSeleccionar }: Props) {
   const [filtro, setFiltro] = useState<string>('Todas');
 
   const tipos = Array.from(
-    new Set(alertas.flatMap(item => item.alertas.map(a => categoriaDe[a.tipo] ?? a.tipo)))
+    new Set(alertas.flatMap((item) => item.alertas.map((a) => categoriaDe[a.tipo] ?? a.tipo)))
   );
+  const totalAlertas = alertas.reduce((acc, item) => acc + item.alertas.length, 0);
 
   return (
     <div className="card border-0 shadow-sm">
       <div className="card-body">
         <p className="fw-semibold small text-muted text-uppercase mb-3" style={{ letterSpacing: '1px' }}>
-          <i className="bi bi-exclamation-triangle me-1"></i>Alertas activas
+          <i className="bi bi-exclamation-triangle me-1"></i>Alertas activas ({totalAlertas})
         </p>
 
         {/* Filtro por tipo */}
