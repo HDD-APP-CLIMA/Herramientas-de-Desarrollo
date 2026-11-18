@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "vite",
-    "start": "node server.js",
-    "server": "nodemon server.js"
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
