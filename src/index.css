@@ -796,6 +796,211 @@ a {
   margin: 0;
 }
 
+/* NUEVAS FUNCIONES: BÚSQUEDA, FAVORITOS, PRONÓSTICO Y ACTUALIZACIÓN */
+
+.search-panel {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.search-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(100%, 520px);
+  margin-left: auto;
+}
+
+.search-actions .search-form {
+  width: 100%;
+}
+
+.geo-button {
+  align-self: flex-start;
+  border: 1px solid #d9e3f7;
+  border-radius: 10px;
+  background: #f4f8ff;
+  color: #2f5fd0;
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.geo-button:hover:not(:disabled) {
+  background: #e8f0ff;
+  transform: translateY(-1px);
+}
+
+.favorites-bar {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 14px;
+  margin-top: 4px;
+  border-top: 1px solid #edf0f7;
+}
+
+.favorites-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7a92;
+  margin-right: 4px;
+}
+
+.favorite-chip {
+  border: 1px solid #e3e9f5;
+  background: #f8faff;
+  color: #2b3a55;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.favorite-chip small {
+  color: #8792a7;
+  font-weight: 600;
+}
+
+.favorite-chip:hover {
+  background: #edf2ff;
+  border-color: #cfdcff;
+}
+
+.refresh-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #edf0f7;
+  border-radius: 14px;
+  font-size: 12px;
+  color: #5e6d86;
+}
+
+.refresh-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.refresh-toggle input {
+  accent-color: #527cf0;
+}
+
+.refresh-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.refresh-now {
+  border: 1px solid #d9e3f7;
+  background: #f4f8ff;
+  color: #2f5fd0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.refresh-now:hover {
+  background: #e8f0ff;
+}
+
+.fav-toggle {
+  margin-top: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.fav-toggle:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateY(-1px);
+}
+
+.fav-toggle.active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.forecast-section {
+  margin-top: 31px;
+}
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.forecast-card {
+  background: #fff;
+  border: 1px solid #e9edf6;
+  border-radius: 17px;
+  padding: 16px 12px;
+  text-align: center;
+  box-shadow: 0 7px 22px #25385805;
+  animation: fade-up 0.5s ease both;
+}
+
+.forecast-day {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2b3a55;
+  text-transform: capitalize;
+}
+
+.forecast-card img {
+  width: 64px;
+  height: 64px;
+  margin: -4px auto;
+}
+
+.forecast-desc {
+  margin: 0 0 10px;
+  font-size: 11px;
+  color: #6b7a92;
+  text-transform: capitalize;
+  min-height: 30px;
+}
+
+.forecast-temp {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+}
+
+.forecast-temp .max {
+  color: #202d47;
+}
+
+.forecast-temp .min {
+  color: #8792a7;
+  font-weight: 700;
+}
+
 /* ANIMACIONES */
 
 @keyframes spin {
@@ -842,12 +1047,21 @@ a {
     flex-direction: column;
   }
 
+  .search-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
   .search-form {
     width: 100%;
   }
 
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .forecast-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -925,6 +1139,20 @@ a {
 
   .search-form button {
     width: 100%;
+  }
+
+  .geo-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .refresh-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .forecast-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .welcome-panel {
@@ -1026,6 +1254,10 @@ a {
 
 @media (max-width: 380px) {
   .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .forecast-grid {
     grid-template-columns: 1fr;
   }
 
