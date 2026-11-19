@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // La clave de OpenWeather está guardada en src/.env en este proyecto.
+  envDir: './src',
   test: {
     environment: 'jsdom',
     globals: true,
