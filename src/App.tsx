@@ -1,35 +1,70 @@
-
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 // @ts-ignore CSS is loaded by the bundler; TypeScript has no CSS module declaration.
 import './index.css';
 
-interface WeatherData {
-  name: string;
-  sys: {
-    country: string;
-  };
-  main: {
-    temp: number;
-    feels_like: number;
-    humidity: number;
-    pressure: number;
-  };
-  wind: {
-    speed: number;
-  };
-  weather: Array<{
-    main: string;
-    description: string;
-    icon: string;
-  }>;
+import type {
+  PronosticoDia,
+  PronosticoResponse,
+  WeatherData,
+} from './models/clima.model';
+import {
+  agruparPronostico,
+  fechaLocalClima,
+  formatearTemperatura,
+  obtenerCondicion,
+  obtenerEmoji,
+  obtenerTema,
+  simboloUnidad,
+} from './utils/clima';
+import { generarConsejos } from './utils/recomendaciones';
+import ConsejosClima from './components/ConsejosClima';
+import DetallesClima from './components/DetallesClima';
+import PlanDelDia from './components/PlanDelDia';
+import Pronostico5Dias from './components/Pronostico5Dias';
+
+function obtenerApiKey(): string | undefined {
+  return (import.meta as ImportMeta & {
+    env: { VITE_OPENWEATHER_API_KEY?: string };
+  }).env.VITE_OPENWEATHER_API_KEY;
 }
 
 function App() {
   const [isCelsius, setIsCelsius] = useState(true);
   const [city, setCity] = useState('');
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [pronostico, setPronostico] = useState<PronosticoDia[]>([]);
   const [loading, setLoading] = useState(false);
+  const [cargandoPronostico, setCargandoPronostico] = useState(false);
   const [error, setError] = useState('');
+  const [errorPronostico, setErrorPronostico] = useState('');
+
+  const cargarPronostico = async (searchCity: string, datos: WeatherData) => {
+    setPronostico([]);
+    setErrorPronostico('');
+    setCargandoPronostico(true);
+
+    try {
+      const API_KEY = obtenerApiKey();
+      if (!API_KEY) throw new Error('Falta configurar la clave de OpenWeather.');
+
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(
+          searchCity
+        )}&appid=${API_KEY}&units=metric&lang=es`
+      );
+
+      if (!response.ok) throw new Error('Pronóstico no disponible');
+
+      const data: PronosticoResponse = await response.json();
+      setPronostico(agruparPronostico(data, fechaLocalClima(datos)));
+    } catch {
+      setErrorPronostico(
+        'No pudimos cargar el pronóstico de los próximos 5 días. El clima actual sí está disponible.'
+      );
+    } finally {
+      setCargandoPronostico(false);
+    }
+  };
 
   const fetchWeather = async (searchCity = city) => {
     if (!searchCity.trim()) {
@@ -42,9 +77,7 @@ function App() {
 
     try {
       // La clave se configura en el archivo .env del proyecto.
-      const API_KEY = (import.meta as ImportMeta & {
-        env: { VITE_OPENWEATHER_API_KEY?: string };
-      }).env.VITE_OPENWEATHER_API_KEY;
+      const API_KEY = obtenerApiKey();
 
       if (!API_KEY) {
         throw new Error('Falta configurar la clave de OpenWeather.');
@@ -67,6 +100,7 @@ function App() {
       const data: WeatherData = await response.json();
       setWeatherData(data);
       setCity(data.name);
+      void cargarPronostico(data.name, data);
     } catch (err) {
       setError(
         err instanceof Error
@@ -78,41 +112,20 @@ function App() {
     }
   };
 
-  const condition = weatherData?.weather[0]?.main?.toLowerCase() ?? '';
+  const condicion = weatherData ? obtenerCondicion(weatherData) : '';
+  const weatherTheme = obtenerTema(condicion);
+  const weatherEmoji = obtenerEmoji(condicion);
+  const unidad = simboloUnidad(isCelsius);
 
-  const weatherTheme = condition.includes('rain') ||
-    condition.includes('drizzle') ||
-    condition.includes('thunder')
-      ? 'rainy'
-      : condition.includes('cloud')
-        ? 'cloudy'
-        : condition.includes('snow')
-          ? 'snowy'
-          : condition.includes('clear')
-            ? 'sunny'
-            : 'default';
-
-  const weatherEmoji = condition.includes('thunder')
-    ? '⛈️'
-    : condition.includes('rain') || condition.includes('drizzle')
-      ? '🌧️'
-      : condition.includes('snow')
-        ? '❄️'
-        : condition.includes('cloud')
-          ? '🌥️'
-          : condition.includes('clear')
-            ? '☀️'
-            : '🌤️';
-
-  const toDisplayTemp = (temp: number) =>
-    Math.round(isCelsius ? temp : (temp * 9) / 5 + 32);
-
-  const unit = isCelsius ? '°C' : '°F';
+  const consejos = useMemo(
+    () => (weatherData ? generarConsejos(weatherData, pronostico) : null),
+    [weatherData, pronostico]
+  );
 
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <a className="brand" href="#" aria-label="Tempus, inicio">
+        <a className="brand" href="#inicio" aria-label="Tempus, inicio">
           <span className="brand-icon">☀</span>
           <span>tempus<span className="brand-dot">.</span></span>
         </a>
@@ -129,12 +142,29 @@ function App() {
           <a href="#estadisticas" className="nav-item">
             <span>▥</span> Estadísticas
           </a>
+          <a href="#plan" className="nav-item">
+            <span>✦</span> Plan del día
+          </a>
+          <a href="#pronostico" className="nav-item">
+            <span>▤</span> Pronóstico
+          </a>
         </nav>
 
         <div className="sidebar-bottom">
           <div className="sidebar-weather">
-            <span className="mini-sun">🌤️</span>
-            <p>Un nuevo día,<br />una nueva perspectiva.</p>
+            <span className="mini-sun" aria-hidden="true">
+              {weatherData ? weatherEmoji : '🌤️'}
+            </span>
+            <p>
+              {weatherData ? (
+                <>
+                  Hoy en {weatherData.name}<br />
+                  {weatherData.weather[0]?.description ?? 'Condiciones cambiantes'}
+                </>
+              ) : (
+                <>Un nuevo día,<br />una nueva perspectiva.</>
+              )}
+            </p>
           </div>
           <p className="sidebar-caption">TEMPUS WEATHER</p>
           <p className="sidebar-version">Panel meteorológico</p>
@@ -147,7 +177,7 @@ function App() {
             <p className="eyebrow">TU ESPACIO METEOROLÓGICO</p>
             <h1>Weather Dashboard<span>.</span></h1>
             <p className="topbar-subtitle">
-              Descubre qué está pasando con el clima.
+              Descubre qué está pasando con el clima y planea mejor tu día.
             </p>
           </div>
 
@@ -218,8 +248,8 @@ function App() {
               <span className="welcome-badge">✦ BIENVENIDO A TEMPUS</span>
               <h2>El clima cambia.<br />Tu día sigue.</h2>
               <p>
-                Consulta las condiciones meteorológicas actuales de cualquier
-                ciudad y prepárate para lo que venga.
+                Consulta el clima actual, recibe ideas para tu día, consejos
+                personalizados y el pronóstico de los próximos 5 días.
               </p>
               <button
                 className="example-button"
@@ -252,14 +282,14 @@ function App() {
                   <span>⌖</span> {weatherData.name}, {weatherData.sys.country}
                 </p>
                 <h2 className="hero-temperature">
-                  {toDisplayTemp(weatherData.main.temp)}<span>{unit}</span>
+                  {formatearTemperatura(weatherData.main.temp, isCelsius)}<span>{unidad}</span>
                 </h2>
                 <p className="hero-description">
                   {weatherData.weather[0].description}
                 </p>
                 <p className="hero-feels">
-                  Sensación térmica de {toDisplayTemp(weatherData.main.feels_like)}
-                  {unit}
+                  Sensación térmica de {formatearTemperatura(weatherData.main.feels_like, isCelsius)}
+                  {unidad}
                 </p>
               </div>
 
@@ -276,62 +306,29 @@ function App() {
               <div className="hero-decoration decoration-two" />
             </section>
 
-            <section className="stats-section" id="estadisticas">
-              <div className="section-heading">
-                <div>
-                  <p className="eyebrow">DATOS EN TIEMPO ACTUAL</p>
-                  <h2>Detalles del clima</h2>
-                </div>
-                <span className="section-note">📍 {weatherData.name}</span>
-              </div>
+            <DetallesClima datos={weatherData} esCelsius={isCelsius} />
 
-              <div className="stats-grid">
-                <article className="stat-card humidity-card">
-                  <div className="stat-top">
-                    <span className="stat-icon">💧</span>
-                    <span className="stat-label">Humedad</span>
-                  </div>
-                  <p className="stat-value">{weatherData.main.humidity}<span>%</span></p>
-                  <p className="stat-description">Humedad del ambiente</p>
-                  <div className="stat-progress">
-                    <span style={{ width: `${weatherData.main.humidity}%` }} />
-                  </div>
-                </article>
+            {consejos && (
+              <>
+                <PlanDelDia
+                  resumen={consejos.resumen}
+                  actividades={consejos.actividades}
+                  tema={weatherTheme}
+                />
+                <ConsejosClima
+                  recomendaciones={consejos.recomendaciones}
+                  precauciones={consejos.precauciones}
+                />
+              </>
+            )}
 
-                <article className="stat-card feels-card">
-                  <div className="stat-top">
-                    <span className="stat-icon">🌡️</span>
-                    <span className="stat-label">Sensación térmica</span>
-                  </div>
-                  <p className="stat-value">
-                    {toDisplayTemp(weatherData.main.feels_like)}<span>{unit}</span>
-                  </p>
-                  <p className="stat-description">Cómo se percibe la temperatura</p>
-                </article>
-
-                <article className="stat-card wind-card">
-                  <div className="stat-top">
-                    <span className="stat-icon">💨</span>
-                    <span className="stat-label">Velocidad del viento</span>
-                  </div>
-                  <p className="stat-value">
-                    {weatherData.wind.speed.toFixed(1)}<span> m/s</span>
-                  </p>
-                  <p className="stat-description">Velocidad actual del viento</p>
-                </article>
-
-                <article className="stat-card pressure-card">
-                  <div className="stat-top">
-                    <span className="stat-icon">◉</span>
-                    <span className="stat-label">Presión atmosférica</span>
-                  </div>
-                  <p className="stat-value">
-                    {weatherData.main.pressure}<span> hPa</span>
-                  </p>
-                  <p className="stat-description">Presión a nivel local</p>
-                </article>
-              </div>
-            </section>
+            <Pronostico5Dias
+              dias={pronostico}
+              cargando={cargandoPronostico}
+              error={errorPronostico}
+              unidad={unidad}
+              esCelsius={isCelsius}
+            />
           </>
         )}
 
